@@ -94,14 +94,22 @@ router.post('/', uploadFields, async (req, res) => {
       motherName,
       fatherName,
       aadhaarNumber,
+      parentAadhaarNumber,
       parentPhone,
       parentEmail,
       studentPhone,
+      studentEmail,
       dob,
       previousStream,
       previousCollege,
+      pucBoard,
       pucMarks,
+      pucCgpa,
+      pucPercentage,
+      sslcBoard,
       sslcMarks,
+      sslcCgpa,
+      sslcPercentage,
       permanentAddress
     } = req.body;
 
@@ -151,25 +159,107 @@ router.post('/', uploadFields, async (req, res) => {
       studentSignature: req.files['studentSignature'][0].filename
     };
 
-    // Save admission
-    const newAdmission = new Admission({
+    // Clean and validate inputs to prevent casting issues in Mongoose
+    const admissionData = {
       studentName,
       motherName,
       fatherName,
       aadhaarNumber,
+      parentAadhaarNumber: parentAadhaarNumber || '',
       parentPhone,
       parentEmail,
       studentPhone,
+      studentEmail: studentEmail || '',
       dob,
       previousStream,
       previousCollege,
-      pucMarks,
-      sslcMarks,
+      pucBoard: pucBoard || 'State',
+      sslcBoard: sslcBoard || 'State',
+      pucPercentage: parseFloat(pucPercentage) || 0,
+      sslcPercentage: parseFloat(sslcPercentage) || 0,
       permanentAddress,
       documents: documentPaths
-    });
+    };
 
+    if (admissionData.pucBoard === 'State') {
+      if (pucMarks !== undefined && pucMarks !== '') {
+        admissionData.pucMarks = parseFloat(pucMarks);
+      }
+    } else {
+      if (pucCgpa !== undefined && pucCgpa !== '') {
+        admissionData.pucCgpa = parseFloat(pucCgpa);
+      }
+    }
+
+    if (admissionData.sslcBoard === 'State') {
+      if (sslcMarks !== undefined && sslcMarks !== '') {
+        admissionData.sslcMarks = parseFloat(sslcMarks);
+      }
+    } else {
+      if (sslcCgpa !== undefined && sslcCgpa !== '') {
+        admissionData.sslcCgpa = parseFloat(sslcCgpa);
+      }
+    }
+
+    // Save admission
+    const newAdmission = new Admission(admissionData);
     const savedAdmission = await newAdmission.save();
+
+    // Trigger automatic confirmation email to parent upon successful form submission
+    if (savedAdmission.parentEmail) {
+      const teacherEmail = process.env.SMTP_USER || 'admissions@pcjabin.edu.in';
+      const submissionSubject = `Admission Application Received - KLE's BCA P. C. Jabin Science College Hubballi`;
+      
+      const sslcDetails = savedAdmission.sslcBoard === 'CBSE' 
+        ? `CBSE CGPA ${savedAdmission.sslcCgpa}/10` 
+        : `State Board Marks ${savedAdmission.sslcMarks}/625`;
+
+      const pucDetails = savedAdmission.pucBoard === 'CBSE' 
+        ? `CBSE CGPA ${savedAdmission.pucCgpa}/10` 
+        : `State Board Marks ${savedAdmission.pucMarks}/600`;
+
+      const submissionBody = `Dear Parent/Guardian,
+
+We have successfully received the provisional admission application for your ward, ${studentName}.
+
+Details of Submission:
+- Candidate Name: ${studentName}
+- Application ID: ${savedAdmission._id}
+- Previous Stream: ${previousStream}
+- SSLC: ${sslcDetails} (${savedAdmission.sslcPercentage}%)
+- PUC II: ${pucDetails} (${savedAdmission.pucPercentage}%)
+- Status: Pending Review
+
+The admissions committee will review the submitted documents shortly. You will receive an automated email notification once the admission is approved or rejected by the teacher.
+
+If you have any questions, please contact the admissions desk at:
+- Email: ${teacherEmail}
+- Phone: +91 836 237 2285
+
+Warm regards,
+Admissions Committee
+KLE's BCA P. C. Jabin Science College Hubballi`;
+
+      try {
+        // Create EmailLog entry
+        const log = new EmailLog({
+          recipientEmail: savedAdmission.parentEmail,
+          studentName: savedAdmission.studentName,
+          subject: submissionSubject,
+          body: submissionBody,
+          type: 'Submission'
+        });
+        await log.save();
+
+        // Dispatch email
+        await sendEmail(savedAdmission.parentEmail, submissionSubject, submissionBody);
+
+        console.log(`✅ Automatic submission confirmation email sent to ${savedAdmission.parentEmail}`);
+      } catch (emailErr) {
+        console.error('⚠️ Failed to send automatic submission email:', emailErr.message);
+      }
+    }
+
     res.status(201).json(savedAdmission);
   } catch (error) {
     console.error('Error submitting admission:', error);
@@ -307,7 +397,7 @@ Details of College to Visit for Final Admissions:
 - College Name: KLE's BCA P. C. Jabin Science College Hubballi
 - Address: Vidya Nagar, Hubballi, Karnataka 580031
 - Contact Number: +91 836 237 2285
-- Email: admissions@pcjabin.edu.in
+- Email: ${process.env.SMTP_USER || 'admissions@pcjabin.edu.in'}
 - Office Timings: Monday to Saturday, 10:00 AM - 5:00 PM
 
 Next Steps:
@@ -333,7 +423,7 @@ If you believe this was an error or wish to rectify the document issues, you may
 - College Name: KLE's BCA P. C. Jabin Science College Hubballi
 - Address: Vidya Nagar, Hubballi, Karnataka 580031
 - Contact Number: +91 836 237 2285
-- Email: admissions@pcjabin.edu.in
+- Email: ${process.env.SMTP_USER || 'admissions@pcjabin.edu.in'}
 
 Warm regards,
 Admissions Committee
@@ -388,5 +478,30 @@ KLE's BCA P. C. Jabin Science College Hubballi`;
   }
 });
 
+// @route   PATCH /api/admissions/:id/uucms-roll
+// @desc    Manually assign UUCMS Number and Roll Number to student and notify parent via email
+// @access  Public
+router.patch('/:id/uucms-roll', checkDbConnection, async (req, res) => {
+  try {
+    const { uucmsNo, rollNo } = req.body;
+    if (!uucmsNo || !rollNo) {
+      return res.status(400).json({ message: 'Both UUCMS Number and Roll Number are required' });
+    }
+
+    const admission = await Admission.findByIdAndUpdate(
+      req.params.id,
+      { uucmsNo: uucmsNo.trim(), rollNo: rollNo.trim() },
+      { new: true }
+    );
+
+    if (!admission) {
+      return res.status(404).json({ message: 'Student admission record not found' });
+    }
+    res.json(admission);
+  } catch (error) {
+    console.error('Error assigning UUCMS & Roll No:', error);
+    res.status(500).json({ message: error.message || 'Server error assigning UUCMS and Roll number' });
+  }
+});
 
 module.exports = router;

@@ -4,11 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "client": "vite",
+    "parents": "npm run dev --prefix parents-dashboard",
+    "teachers": "npm run dev --prefix teachers-dashboard",
     "server": "npm run dev --prefix server",
-    "dev": "concurrently \"npm run client\" \"npm run server\"",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "concurrently \"npm run server\" \"npm run parents\" \"npm run teachers\"",
+    "build:parents": "npm run build --prefix parents-dashboard",
+    "build:teachers": "npm run build --prefix teachers-dashboard",
+    "build": "npm run build:parents && npm run build:teachers"
   },
   "dependencies": {
     "dotenv": "^17.4.2",

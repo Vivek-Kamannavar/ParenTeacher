@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
 
 const OtpSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
   phone: {
     type: String,
-    required: true,
-    trim: true
-  },
-  aadhaarNumber: {
-    type: String,
-    required: true,
     trim: true
   },
   otp: {

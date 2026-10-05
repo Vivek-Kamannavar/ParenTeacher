@@ -23,7 +23,7 @@ const EmailLogSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['Approval', 'Rejection'],
+    enum: ['Approval', 'Rejection', 'Submission'],
     required: true
   },
   sentAt: {

@@ -11,10 +11,30 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     sparse: true // Allows multiple null/undefined values for teachers since phone is unique only for parents
   },
+  parentEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    sparse: true
+  },
+  studentEmail: {
+    type: String,
+    trim: true,
+    lowercase: true
+  },
+  studentPhone: {
+    type: String,
+    trim: true
+  },
   studentAadhaar: {
     type: String,
     trim: true,
     sparse: true // Unique Aadhaar per parent account
+  },
+  parentAadhaar: {
+    type: String,
+    trim: true,
+    sparse: true // Parent Aadhaar card number
   },
   teacherId: {
     type: String,

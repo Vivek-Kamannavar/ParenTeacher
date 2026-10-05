@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import campusImg from '../assets/campus.jpg';
 
 const coursesData = {
   ai: {
@@ -374,25 +375,63 @@ const AboutUs = ({ onStartAdmission }) => {
         alignItems: 'start',
         marginBottom: '3rem'
       }}>
-        {/* Left Column: Photos Placeholder */}
-        <div style={{ 
+        {/* Left Column: Campus Photo Card */}
+        <div className="about-campus-card" style={{ 
           background: 'rgba(255, 255, 255, 0.02)',
-          border: '1.5px dashed rgba(255, 255, 255, 0.12)',
+          border: '1px solid var(--border-color)',
           borderRadius: '16px',
-          padding: '3rem 2rem',
-          textAlign: 'center',
+          overflow: 'hidden',
+          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.35)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '300px',
-          boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.2)'
+          transition: 'all 0.3s ease'
         }}>
-          <span style={{ fontSize: '3.5rem', marginBottom: '1rem', filter: 'drop-shadow(0 4px 10px rgba(99, 102, 241, 0.3))' }}>🖼️</span>
-          <h4 style={{ color: 'white', fontWeight: '700', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Campus Gallery</h4>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '240px', lineHeight: '1.5' }}>
-            Photos representing the classrooms, labs, and student batches will be updated here soon.
-          </p>
+          <div style={{ position: 'relative', width: '100%', paddingTop: '80%', overflow: 'hidden' }}>
+            <img 
+              src={campusImg} 
+              alt="K.L.E. Society's P. C. Jabin Science College Campus" 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.5s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+              padding: '1.25rem 1rem 0.8rem 1rem',
+              color: 'white',
+              textAlign: 'left'
+            }}>
+              <span style={{ 
+                background: 'var(--color-primary-hover)', 
+                color: 'white', 
+                fontSize: '0.7rem', 
+                fontWeight: '700', 
+                padding: '0.2rem 0.6rem', 
+                borderRadius: '4px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Autonomous • CPE Phase III • Grade A NAAC
+              </span>
+              <h4 style={{ color: 'white', fontWeight: '800', margin: '0.4rem 0 0 0', fontSize: '1.05rem', lineHeight: '1.3' }}>
+                K.L.E. Society's P. C. Jabin Science College
+              </h4>
+              <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', margin: '0.2rem 0 0 0' }}>
+                Vidyanagar, Hubballi
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Text content */}
@@ -433,6 +472,7 @@ const AboutUs = ({ onStartAdmission }) => {
           {fourCs.map((c, idx) => (
             <div 
               key={idx} 
+              className="four-cs-card"
               style={{ 
                 background: 'rgba(255, 255, 255, 0.03)', 
                 border: '1px solid var(--border-color)', 
@@ -441,7 +481,7 @@ const AboutUs = ({ onStartAdmission }) => {
                 textAlign: 'center'
               }}
             >
-              <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.75rem' }}>{c.icon}</span>
+              <span className="pillar-icon" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.75rem' }}>{c.icon}</span>
               <h4 style={{ color: 'white', fontWeight: '700', marginBottom: '0.4rem', fontSize: '1rem' }}>{c.name}</h4>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: '1.5', margin: 0 }}>{c.desc}</p>
             </div>
@@ -494,6 +534,7 @@ const AboutUs = ({ onStartAdmission }) => {
           {whyChooseUsData.map((item, idx) => (
             <div 
               key={idx} 
+              className="why-choose-card"
               style={{ 
                 background: 'rgba(255, 255, 255, 0.02)', 
                 border: '1px solid var(--border-color)', 
@@ -504,7 +545,7 @@ const AboutUs = ({ onStartAdmission }) => {
                 alignItems: 'flex-start'
               }}
             >
-              <div style={{
+              <div className="check-circle" style={{
                 background: 'rgba(99, 102, 241, 0.15)',
                 borderRadius: '50%',
                 width: '28px',
@@ -559,6 +600,7 @@ const AboutUs = ({ onStartAdmission }) => {
             return (
               <div 
                 key={key} 
+                className="course-hover-card"
                 onClick={() => handleCourseClick(key)}
                 onMouseEnter={() => setHoveredCourseId(key)}
                 onMouseLeave={() => setHoveredCourseId(null)}
@@ -577,7 +619,7 @@ const AboutUs = ({ onStartAdmission }) => {
                 }}
               >
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{
+                  <div className="course-icon-badge" style={{
                     width: '46px',
                     height: '46px',
                     borderRadius: '10px',
@@ -587,7 +629,8 @@ const AboutUs = ({ onStartAdmission }) => {
                     justifyContent: 'center',
                     fontSize: '1.4rem',
                     color: 'white',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.15)'
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                    transition: 'all 0.3s ease'
                   }}>
                     {course.icon}
                   </div>
@@ -608,7 +651,7 @@ const AboutUs = ({ onStartAdmission }) => {
                   marginTop: '0.5rem',
                   transition: 'color 0.2s ease'
                 }}>
-                  Explore Course Details <span style={{ transition: 'transform 0.2s ease', transform: isHovered ? 'translateX(3px)' : 'translateX(0)' }}>→</span>
+                  Explore Course Details <span className="course-arrow" style={{ transition: 'transform 0.2s ease', transform: isHovered ? 'translateX(3px)' : 'translateX(0)' }}>→</span>
                 </div>
               </div>
             );
@@ -659,6 +702,7 @@ const AboutUs = ({ onStartAdmission }) => {
             ].map((tab) => (
               <button
                 key={tab.id}
+                className="dashboard-tab-btn"
                 onClick={() => setActiveDashboardTab(tab.id)}
                 style={{
                   background: activeDashboardTab === tab.id ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
@@ -737,7 +781,7 @@ const AboutUs = ({ onStartAdmission }) => {
                     </thead>
                     <tbody>
                       {syllabusData[activeSemTab].map((sub, idx) => (
-                        <tr key={idx} style={{ borderBottom: idx < syllabusData[activeSemTab].length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                        <tr key={idx} className="syllabus-table-row" style={{ borderBottom: idx < syllabusData[activeSemTab].length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                           <td style={{ padding: '0.85rem', color: 'var(--color-primary-hover)', fontWeight: '700' }}>{sub.type}</td>
                           <td style={{ padding: '0.85rem', color: 'white' }}>{sub.name}</td>
                           <td style={{ padding: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>

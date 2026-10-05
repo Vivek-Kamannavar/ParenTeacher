@@ -18,9 +18,14 @@ const AdmissionSchema = new mongoose.Schema({
   },
   aadhaarNumber: {
     type: String,
-    required: [true, 'Aadhaar number is required'],
+    required: [true, 'Student Aadhaar number is required'],
     trim: true,
-    match: [/^\d{12}$/, 'Please provide a valid 12-digit Aadhaar number']
+    match: [/^\d{12}$/, 'Please provide a valid 12-digit Student Aadhaar number']
+  },
+  parentAadhaarNumber: {
+    type: String,
+    trim: true,
+    match: [/^\d{12}$/, 'Please provide a valid 12-digit Parent Aadhaar number']
   },
   parentPhone: {
     type: String,
@@ -40,6 +45,11 @@ const AdmissionSchema = new mongoose.Schema({
     trim: true,
     match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
   },
+  studentEmail: {
+    type: String,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
+  },
   dob: {
     type: Date,
     required: [true, 'Date of birth is required']
@@ -54,17 +64,51 @@ const AdmissionSchema = new mongoose.Schema({
     required: [true, 'Previous college name is required'],
     trim: true
   },
+  pucBoard: {
+    type: String,
+    enum: ['State', 'CBSE'],
+    default: 'State'
+  },
   pucMarks: {
     type: Number,
-    required: [true, 'PUC II Marks/Percentage are required'],
+    required: function() { return this.pucBoard === 'State'; },
     min: [0, 'Marks cannot be negative'],
-    max: [600, 'Marks cannot exceed maximum limits'] // Standard max marks in Karnataka PUC is 600, or percentage
+    max: [600, 'Marks cannot exceed maximum limits'] // Standard max marks in Karnataka PUC is 600
+  },
+  pucCgpa: {
+    type: Number,
+    required: function() { return this.pucBoard === 'CBSE'; },
+    min: [0, 'CGPA cannot be negative'],
+    max: [10, 'CGPA cannot exceed 10']
+  },
+  pucPercentage: {
+    type: Number,
+    required: [true, 'PUC Percentage is required'],
+    min: [0, 'Percentage cannot be negative'],
+    max: [100, 'Percentage cannot exceed 100']
+  },
+  sslcBoard: {
+    type: String,
+    enum: ['State', 'CBSE'],
+    default: 'State'
   },
   sslcMarks: {
     type: Number,
-    required: [true, 'SSLC Marks/Percentage are required'],
+    required: function() { return this.sslcBoard === 'State'; },
     min: [0, 'Marks cannot be negative'],
-    max: [625, 'Marks cannot exceed maximum limits'] // Standard max marks in Karnataka SSLC is 625, or percentage
+    max: [625, 'Marks cannot exceed maximum limits'] // Standard max marks in Karnataka SSLC is 625
+  },
+  sslcCgpa: {
+    type: Number,
+    required: function() { return this.sslcBoard === 'CBSE'; },
+    min: [0, 'CGPA cannot be negative'],
+    max: [10, 'CGPA cannot exceed 10']
+  },
+  sslcPercentage: {
+    type: Number,
+    required: [true, 'SSLC Percentage is required'],
+    min: [0, 'Percentage cannot be negative'],
+    max: [100, 'Percentage cannot exceed 100']
   },
   permanentAddress: {
     type: String,
@@ -88,6 +132,16 @@ const AdmissionSchema = new mongoose.Schema({
   },
   rejectionReason: {
     type: String,
+    default: ''
+  },
+  uucmsNo: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  rollNo: {
+    type: String,
+    trim: true,
     default: ''
   },
   createdAt: {

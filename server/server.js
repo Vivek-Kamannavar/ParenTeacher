@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const admissionRoutes = require('./routes/admissionRoutes');
 const authRoutes = require('./routes/authRoutes');
+const recordRoutes = require('./routes/recordRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/admissions', admissionRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/records', recordRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
